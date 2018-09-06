@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, abort
+from flask import Flask, jsonify, abort, request, make_response
 
 app = Flask(__name__)
 
@@ -63,6 +63,34 @@ def get_task(order_id):
         abort(404)
 
     return jsonify({'order': required_order[0]})
+
+
+@app.route('/Fast_Food_Fast/api/v1/orders', methods=['POST'])
+def place_order():
+    if not request.json or not 'summary' in request.json:
+        abort(404)
+
+    order = [
+        {
+            'id': orders[-1]['id']+1,
+            'customer': request.json['customer'],
+            'location': request.json['location'],
+            'summary': request.json['summary'],
+            'quantity': request.json['quantity'],
+            'total': str(int(request.json['quantity']) * 250),
+            'accepted': True
+        }
+    ]
+
+    orders.append(order[0])
+    return jsonify({
+        'order': order
+    }), 201
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
 
 
 if __name__ == '__main__':
